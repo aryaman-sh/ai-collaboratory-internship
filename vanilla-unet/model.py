@@ -4,6 +4,16 @@ from torch import tensor
 import torch.nn.functional as F
 from collections import OrderedDict
 
+def weights_init_relu(m):
+    # Initializing ConvTranspose2d as Kaiming had negative effects
+    if isinstance(m, nn.Conv2d):
+        nn.init.kaiming_uniform_(m.weight, mode='fan_in', nonlinearity='relu')
+        if m.bias is not None:
+            nn.init.zeros_(m.bias)
+    if isinstance(m, nn.Linear):
+        nn.init.kaiming_uniform_(m.weight, mode='fan_in', nonlinearity='relu')
+        if m.bias is not None:
+            nn.init.zeros_(m.bias)
 
 class UNet(nn.Module):
     """From https://github.com/mateuszbuda/brain-segmentation-pytorch/blob/master/unet.py"""
