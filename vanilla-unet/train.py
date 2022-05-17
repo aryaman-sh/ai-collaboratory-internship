@@ -34,8 +34,6 @@ Training Function
 """
 writer_real = SummaryWriter(f"logs/real")
 write_pred = SummaryWriter(f"logs/pred")
-
-
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 step = 0
 for j in range(5):
@@ -58,7 +56,6 @@ for j in range(5):
 
         writer_real.add_image("Real", img_grid_real, global_step=step)
         write_pred.add_image("Pred", img_grid_pred, global_step=step)
-
     step+=1
 
 #%%

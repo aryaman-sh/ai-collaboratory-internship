@@ -6,6 +6,7 @@ import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+import threading
 
 
 class Participant:
@@ -67,18 +68,30 @@ class Participant:
         print(loss.item())
         return grads
 
-    def update_model(self, grads):
+    def step(self, grads=None):
         """
         Update step on gradients
         :param grads: update grads, to update confined model
         """
-        for name, param in grads:
-            for name2, param2 in self.model.named_parameters():
-                if name == name2:
-                    param2.grad = param.grad
+        if grads is not None:
+            for name, param in grads:
+                for name2, param2 in self.model.named_parameters():
+                    if name == name2:
+                        param2.grad = param.grad
         optimizer.step()
         optimizer.zero_grad()
 
+    def init_all(self, model, dataloader, lr):
+        self.init_model(model)
+        self.init_optim(lr)
+        self.init_loss()
+        self.init_dataloader(dataloader)
+
+    def get_model(self):
+        return self.model
+
+    def update_model(self, model):
+        self.model = model
 
 n_epochs = 3
 batch_size_train = 64
@@ -135,4 +148,53 @@ for i in range(10):
 print("done")
 """
 ################ Multi participant training Simple Addition
+# Between three particints
+model_p1 = Net()
+model_p2 = Net()
+model_p3 = Net()
 
+p1 = Participant(id=1)
+p1.init_all(model=model_p1, dataloader=train_loader, lr=learning_rate)
+
+p2 = Participant(id=2)
+p2.init_all(model=model_p2, dataloader=train_loader, lr=learning_rate)
+
+p3 = Participant(id=3)
+p3.init_all(model=model_p3, dataloader=train_loader, lr=learning_rate)
+
+
+grad1 = p1.perform_iter()
+grad2 = p2.perform_iter()
+grad3 = p3.perform_iter()
+
+mp1 = p1.get_model()
+mp2 = p2.get_model()
+mp3 = p3.get_model()
+
+# Verbose verification
+pa1grads = []
+pa2grads = []
+pa3grads = []
+sumgrads = []
+
+for pa1, pa2, pa3 in zip(mp1.parameters(), mp2.parameters(), mp3.parameters()):
+    pa1grads.append(pa1)
+    pa2grads.append(pa2)
+    pa3grads.append(pa3)
+
+    sum_grad = (pa1.grad + pa2.grad + pa3.grad)
+    sumgrads.append(sum_grad)
+    pa1.grad = sum_grad
+    pa2.grad = sum_grad.clone()
+    pa3.grad = sum_grad.clone()
+
+p1.update_model(mp1)
+p2.update_model(mp2)
+p3.update_model(mp3)
+
+#p1.step()
+#p2.step()
+#p3.step()
+print("Done")
+
+#%%
