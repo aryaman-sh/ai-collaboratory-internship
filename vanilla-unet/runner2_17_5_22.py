@@ -156,9 +156,10 @@ loss_val = []
 step = 0
 model = model.to(device)
 
-writer_real = SummaryWriter(f"logs/real1")
-write_pred = SummaryWriter(f"logs/pred1")
-write_train = SummaryWriter(f"logs/train1")
+writer_real = SummaryWriter(f"logs/real2")
+write_pred = SummaryWriter(f"logs/pred2")
+write_train = SummaryWriter(f"logs/train2")
+write_val = SummaryWriter(f"logs/val2")
 
 for epoch in range(epochs):
     # Train
@@ -186,16 +187,18 @@ for epoch in range(epochs):
             loss = dsc_loss(y_pred, y_true)
             running_loss += loss.item()
     loss_val.append(running_loss)
-    write_train.add_scalar("val", running_loss, global_step=step)
+    write_val.add_scalar("val", running_loss, global_step=step)
 
     # Summary writer to show actual, predicted mask
     with torch.no_grad():
         real = next(enumerate(dl))
+        real_y = real[1][1]
+        real_y = real_y.to(device)
         real = real[1][0]
         real = real.to(device)
         pred = model(real)
         img_grid_real = torchvision.utils.make_grid(
-            real[:5], normalize=True
+            real_y[:5], normalize=True
         )
         img_grid_pred = torchvision.utils.make_grid(
             pred[:5], normalize=True
@@ -204,6 +207,3 @@ for epoch in range(epochs):
         writer_real.add_image("Real", img_grid_real, global_step=step)
         write_pred.add_image("Pred", img_grid_pred, global_step=step)
     step+=1
-
-
-
