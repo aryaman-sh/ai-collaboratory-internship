@@ -1,5 +1,6 @@
 """
 Data utils for BraTS 2021 data
+Train and Validation version
 """
 import math
 import random
@@ -13,12 +14,12 @@ import nibabel as nib
 import random
 
 
-class BraTStrainingNoBlank(Dataset):
+class BraTStrainingNoBlankTrainVal(Dataset):
     """
     Load non blank segmentation masks
     """
 
-    def __init__(self, data_path, no_adjacent_slices=0, val_offset=150):
+    def __init__(self, data_path, no_adjacent_slices=0, val_offset=150, train=True):
         """
         Init dataloader
         :param data_path: Path to dataset (all cases)
@@ -28,7 +29,10 @@ class BraTStrainingNoBlank(Dataset):
         self.base_path = data_path
         self.all_samples = os.listdir(self.base_path)
         self.all_samples.sort()
-        self.all_samples = self.all_samples[:-val_offset]
+        if train:
+            self.all_samples = self.all_samples[:-val_offset]
+        else:
+            self.all_samples = self.all_samples[len(self.all_samples)-val_offset:]
         random.shuffle(self.all_samples)
 
     def __len__(self):
