@@ -35,6 +35,7 @@ class DiceLoss(nn.Module):
 class Participant:
 
     def __init__(self, id):
+        self.device='cuda'
         self.id = id
         self.dataloader = None
         self.model = None
@@ -75,9 +76,11 @@ class Participant:
             print(f'Computing local grad for {str(self.id)}')
         self.optimizer.zero_grad()
         running_loss = 0
-        for batch_idx, (input, labels) in enumerate(self.dataloader):
-            output = self.model(input)
-            loss = self.loss(output, labels)
+        for batch_idx, (X, y) in enumerate(self.dataloader):
+            X = X.to(self.device)
+            y = y.to(self.device)
+            output = self.model(X)
+            loss = self.loss(output, y)
             loss = loss / len(self.dataloader)  # normalize for accumulation
             running_loss += loss
             loss.backward()
