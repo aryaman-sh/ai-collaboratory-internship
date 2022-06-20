@@ -51,7 +51,8 @@ class BraTStrainingNoBlankTrainVal(Dataset):
         volume_t1 = torch.from_numpy(volume_t1)
         volume_mask = torch.from_numpy(volume_mask)
         volume_mask = volume_mask.unsqueeze(0)
-
+        # Using binary masks
+        volume_mask[volume_mask > 0.0] = 1
         return volume_t1, volume_mask
 
     @staticmethod

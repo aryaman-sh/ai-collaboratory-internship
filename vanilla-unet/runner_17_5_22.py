@@ -197,3 +197,5 @@ for epoch in range(epochs):
         writer_real.add_image("Real", img_grid_real, global_step=step)
         write_pred.add_image("Pred", img_grid_pred, global_step=step)
     step += 1
+
+#%%

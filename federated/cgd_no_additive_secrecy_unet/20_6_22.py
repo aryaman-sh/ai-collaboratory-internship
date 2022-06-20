@@ -150,7 +150,7 @@ p3 = Participant(id=3)
 model_p3 = UNet()
 model_p3 = model_p3.to(device)
 p3.init_model(model_p3)
-ds3 = BraTStrainingNoBlankTrainValCGDSplit(data_path=BASE_PATH, total_participants=3, this_participant=3,
+ds3 = BraTStrainingNoBlankTrainValCGDSplit(data_path=BASE_PATH, total_participants=1, this_participant=1,
                                            no_adjacent_slices=1, val_offset=200, train=True)
 dl3 = DataLoader(ds3, batch_size=16, num_workers=1)
 p3.init_dataloader(dl3)

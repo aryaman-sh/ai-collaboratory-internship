@@ -121,7 +121,7 @@ BASE_PATH = '/home/Student/s4606685/BraTS2021_Training_Data/BraTS2021_Training_D
 BATCH_SIZE = 16
 ds = BraTStrainingNoBlankTrainVal(data_path=BASE_PATH, no_adjacent_slices=1, val_offset=200, train=True)
 dl = DataLoader(ds, batch_size=BATCH_SIZE, num_workers=1)
-val_ds = BraTStrainingNoBlankTrainVal(data_path=BASE_PATH, no_adjacent_slices=0, val_offset=200, train=False)
+val_ds = BraTStrainingNoBlankTrainVal(data_path=BASE_PATH, no_adjacent_slices=1, val_offset=200, train=False)
 val_dl = DataLoader(val_ds, batch_size=BATCH_SIZE, num_workers=1)
 """
 Loss fn
