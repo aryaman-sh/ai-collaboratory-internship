@@ -63,13 +63,16 @@ train_loss_p2 = []
 train_loss_p3 = []
 
 writer = SummaryWriter(f"logs/cgd")
+
+
 for j in range(10):
     # 1
+    optim1.zero_grad()
+    optim2.zero_grad()
     running_loss = 0
     for batch_idx, (X, y_true) in enumerate(dl1):
         X = X.to(device)
         y_true = y_true.to(device)
-        optim1.zero_grad()
         y_pred = model_p1(X)
         loss1 = loss_1(y_pred, y_true)
         running_loss += loss1.item()
@@ -81,7 +84,6 @@ for j in range(10):
     for batch_idx, (X, y_true) in enumerate(dl2):
         X = X.to(device)
         y_true = y_true.to(device)
-        optim2.zero_grad()
         y_pred = model_p2(X)
         loss2 = loss_2(y_pred, y_true)
         running_loss += loss2.item()
@@ -90,8 +92,8 @@ for j in range(10):
     train_loss_p2.append(running_loss)
 
     for pA, pB in zip(model_p1.parameters(), model_p2.parameters()):
-        sum_grads = pA.grad.clone() + pB.grad.clone()
-        pA.grad = sum_grads.clone()
+        sum_grads = pA.grad + pB.grad
+        pA.grad = sum_grads
         pB.grad = sum_grads.clone()
 
     optim1.step()

@@ -34,9 +34,9 @@ class BraTStrainingNoBlankTrainValCGDSplit(Dataset):
             self.all_samples = self.all_samples[:-val_offset]
             # Split into partitions for different participants
             # Can't shuffle here for all participants to have unique scans
-            partition_size = len(self.all_samples)//total_participants
-            split_start_index = (this_participant-1)*partition_size
-            self.all_samples = self.all_samples[split_start_index:split_start_index+partition_size]
+            partition_size = len(self.all_samples) // total_participants
+            split_start_index = (this_participant - 1) * partition_size
+            self.all_samples = self.all_samples[split_start_index:split_start_index + partition_size]
         else:
             self.all_samples = self.all_samples[len(self.all_samples) - val_offset:]
         random.shuffle(self.all_samples)
@@ -45,19 +45,27 @@ class BraTStrainingNoBlankTrainValCGDSplit(Dataset):
         return len(self.all_samples)
 
     def __getitem__(self, idx):
-        patient_id = self.all_samples[idx]
+        checker = True
+        while checker:
+            patient_id = self.all_samples[idx]
 
-        volume_t1 = self._load_nii(path=f'{self.base_path}/{patient_id}/{patient_id}_t1.nii.gz')
-        volume_mask = self._load_nii(path=f'{self.base_path}/{patient_id}/{patient_id}_seg.nii.gz')
+            volume_t1 = self._load_nii(path=f'{self.base_path}/{patient_id}/{patient_id}_t1.nii.gz')
+            volume_mask = self._load_nii(path=f'{self.base_path}/{patient_id}/{patient_id}_seg.nii.gz')
 
-        # Normalise volume
-        volume_t1 = (volume_t1 - np.min(volume_t1)) / (np.max(volume_t1) - np.min(volume_t1))
-        volume_mask = (volume_mask - np.min(volume_mask)) / (np.max(volume_mask) - np.min(volume_mask))
-        volume_t1, volume_mask = self._identify_mask(volume_t1, volume_mask, no_adjacent_slices=1)
-        volume_t1 = torch.from_numpy(volume_t1)
-        volume_mask = torch.from_numpy(volume_mask)
-        volume_mask = volume_mask.unsqueeze(0)
+            # Normalise volume
+            volume_t1 = (volume_t1 - np.min(volume_t1)) / (np.max(volume_t1) - np.min(volume_t1))
+            volume_mask = (volume_mask - np.min(volume_mask)) / (np.max(volume_mask) - np.min(volume_mask))
+            volume_t1, volume_mask = self._identify_mask(volume_t1, volume_mask, no_adjacent_slices=1)
+            volume_t1 = torch.from_numpy(volume_t1)
+            volume_mask = torch.from_numpy(volume_mask)
+            volume_mask = volume_mask.unsqueeze(0)
 
+            if volume_t1.shape[0] != 3 or volume_mask.shape[0] != 1:
+                print("Defective shape found replacing")
+                idx = len(self.all_samples) // 2
+            else:
+                checker = False
+            print(volume_t1.shape, volume_mask.shape)
         return volume_t1, volume_mask
 
     @staticmethod
@@ -110,4 +118,4 @@ class BraTStrainingNoBlankTrainValCGDSplit(Dataset):
 
         return volume_img, volume_mask
 
-#%%
+# %%
